@@ -153,3 +153,57 @@ Note: This page may indicate *Jenkins is almost ready!* If so, click **Restart**
 
 **Step 10:** If necessary, you can log back into Jenkins using the credentials you created earlier.
 ![Alt text](pics/07_jenkins-home.png)
+
+
+# Part 3: Running SonarQube in Docker
+**Step 1:** We will use the free community edition image called **lts-community**. There is also a paid version available called the developer version.
+```shell
+docker run -d --name sonarqube -p 30002:9000 sonarqube:lts-community
+```
+
+The first 30002 is the host port (feel free to use another free port on your VM) which is mapped to the second 9000 port, the Docker container port. This is because the SonarQube service is exposed on port 9000. Use docker ps to view the status of the SonarQube container it should be Up and running.
+
+![Alt text](pics/08_sonarqube-container.png)
+
+**Step 2:** Now let's try to access the SonarQube service running inside a Docker container on the SonarQube VM on port 30002.
+
+**Step 3:** Enter your initial username and password as **admin** for the SonarQube service. Then, update the default password to a strong one.
+
+![Alt text](pics/09_sonarqube-login.png)
+
+![Alt text](pics/10_sonarqube-reset-password.png)
+
+
+# Part 4: Running Nexus in Docker
+**Step 1:** Nexus service runs on default port 8081 just like SonarQube service runs on default port 9000 and Jenkins service runs on default port 8080. Run the following command to run the Nexus service inside a Docker container instead of running it on the Nexus VM/node host.
+```shell
+docker run -d --name nexus -p 30003:8081 sonatype/nexus3
+```
+
+The first 30003 is the host port (feel free to use another free port on your VM) which is mapped to the second 8081 port, the Docker container port. This is because the Nexus service is exposed on port 8081. Use docker ps to view the status of the Nexus container it should be Up and running.
+
+![Alt text](pics/11_nexus-container.png)
+
+**Step 2:** Copy and paste the Nexus VM IP address on your web browser to access the Nexus service dashboard.
+
+![Alt text](pics/12_nexus-login.png)
+
+**Step 3:** For SonarQube, we know the default username and password is **admin**. For Nexus, to sign in, the username is also **admin** by default, but the default password is different for everyone. Just like with Jenkins, where we got the password from a file, we will also get our initial password for Nexus from a file. First, we need to access the Docker container using the following commands.
+```shell
+docker exec -it nexus /bin/bash
+cat /nexus-data/admin.password && echo
+```
+
+![Alt text](pics/13_nexus-initial-password.png)
+
+**Step 4:** Copy and paste the password.
+
+![Alt text](pics/14_nexus-login-2.png)
+
+**Step 5:** Set the new password for Nexus.
+
+![Alt text](pics/15_nexus-login-3.png)
+
+**Step 6:** Enable anonymous access
+
+![Alt text](pics/16_nexus-login-4.png)
