@@ -5,7 +5,7 @@ docker network create jenkins
 ```
 ![Alt text](pics/01_create-docker-network.png)
 
-**Step 2:** We will run the React App using a Docker container in a Docker container (more precisely in a Blue Ocean container). This practice is called dind, aka `docker in docker`. So, please download and run `docker:dind` Docker image using the following command.
+**Step 2:** We will run the E-Commerce Java Application using a Docker container in a Docker container (more precisely in a Blue Ocean container). This practice is called dind, aka `docker in docker`. So, please download and run `docker:dind` Docker image using the following command.
 ```shell
 docker run \
   --name jenkins-docker \
@@ -17,7 +17,7 @@ docker run \
   --volume jenkins-docker-certs:/certs/client \
   --volume jenkins-data:/var/jenkins_home \
   --publish 2376:2376 \
-  --publish 3000:3000 --publish 5000:5000 \
+  --publish 8070:8070 --publish 5000:5000 \
   --restart always \
   docker:dind \
   --storage-driver overlay2
@@ -45,7 +45,7 @@ The following is an explanation of the command above.
 
 - **--publish 2376:2376:** Expose the Docker daemon port on the host machine (your computer). This is useful for executing Docker commands on the host machine (your computer) to control the inner Docker daemon.
 
-- **--publish 3000:3000 --publish 5000:5000:** Exposes ports 3000 and 5000 of the dind (docker in docker) container.
+- **--publish 8070:8070--publish 5000:5000:** Exposes ports 3000 and 5000 of the dind (docker in docker) container.
 
 - **--restart always:** ensures the container restarts and stays up not only when there is a failure but also after the server in use has also restarted.
 
@@ -58,7 +58,7 @@ It also mapping the Docker volume
 
 **Step 3:** Create `Dockerfile` and copy the following contents to your Dockerfile.
 ```shell
-FROM jenkins/jenkins:2.426.2-jdk17
+FROM jenkins/jenkins:2.463-jdk17
 USER root
 RUN apt-get update && apt-get install -y lsb-release
 RUN curl -fsSLo /usr/share/keyrings/docker-archive-keyring.asc \
@@ -69,17 +69,17 @@ RUN echo "deb [arch=$(dpkg --print-architecture) \
   $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 RUN apt-get update && apt-get install -y docker-ce-cli
 USER jenkins
-RUN jenkins-plugin-cli --plugins "blueocean:1.27.9 docker-workflow:572.v950f58993843"
+RUN jenkins-plugin-cli --plugins "blueocean:1.27.9 docker-workflow:572.v950f58993843" # New version blueocean:1.27.13 docker-workflow:580.vc0c340686b_54
 ```
 
-**Step 4:** Create a new Docker image from the previous Dockerfile and name it `myjenkins-blueocean:2.426.2-1`.
+**Step 4:** Create a new Docker image from the previous Dockerfile and name it `myjenkins-blueocean:2.463.2-1`.
 ```shell
-docker build -t myjenkins-blueocean:2.426.2-1 .
+docker build -t myjenkins-blueocean:2.463.2-1 .
 ```
 
 ![Alt text](pics/04_jenkins-blueocean-image.png)
 
-**Step 5:** After that, run `myjenkins-blueocean:2.426.2-1` image as a container in Docker using the following command.
+**Step 5:** After that, run `myjenkins-blueocean:2.463.2-1` image as a container in Docker using the following command.
 ```shell
 docker run \
   --name jenkins-blueocean \
@@ -95,7 +95,7 @@ docker run \
   --volume "$HOME":/home \
   --restart=on-failure \
   --env JAVA_OPTS="-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true" \
-  myjenkins-blueocean:2.426.2-1 
+  myjenkins-blueocean:2.463.2-1 
 ```
 
 ![Alt text](pics/05_run-jenkins.png)
@@ -123,7 +123,7 @@ The following is an explanation of the command above.
 
 - **--env JAVA_OPTS="-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true":** Allows checkout on local repositories.
 
-- **myjenkins-blueocean:2.426.2-1:** The name of the Docker image you created in the previous step.
+- **myjenkins-blueocean:2.463.2-1:** The name of the Docker image you created in the previous step.
 
 
 # Part 2: Setting up Jenkins Wizard
@@ -207,3 +207,51 @@ cat /nexus-data/admin.password && echo
 **Step 6:** Enable anonymous access
 
 ![Alt text](pics/16_nexus-login-4.png)
+
+
+# Part 5: Setup Jenkins Plugins and Tools
+**Step 1:** Let's install some plugins on the Jenkins VM. From the Dashboard, navigate to Manage Jenkins in System Configuration and select Plugins.
+
+![Alt text](pics/17_manage-jenkins.png)
+
+**Step 2:** Go to the Available Plugins tab on the left side. Search for **SonarQube Scanner** which will start the analysis.
+
+**Step 3:** Search for nexus and select **Nexus Artifact Uploader**. 
+
+**Step 4:** Search for docker and select **"Docker"**, **"docker-build step"**, and **"CloudBees Docker Build and Publish"**.
+
+![Alt text](pics/18_install-plugins.png)
+
+**Step 5:** After that search for owasp and select **"OWASP Dependency-Check"** and search for jdk and select **"Eclipse Temurin installer"**
+
+![Alt text](pics/19_install-plugins-2.png)
+
+This will help us install multiple versions of jdk whichever we want to use we can go with that specific version. Finally, click on the Install button to Install all the selected plugins on the Jenkins VM. 
+
+**Step 6:** Now navigate to the Manage Jenkins page and select the Tools option.
+
+![Alt text](pics/20_jenkins-tools.png)
+
+**Step 7:** In **JDK Installations** select **Add JDK** option give it a name and select **Install automatically** under which select **Install from adoptium.net** and select jdk 17 version. repeat the same steps for jdk 11 version in case jdk 17 fails we should have jdk 11.
+
+![Alt text](pics/21_jenkins-tools-jdk.png)
+
+**Step 8:** Under **SonarQube Scanner Installations** select **Add SonarQube Scanner** provide a name like sonarqube-scanner. 
+
+![Alt text](pics/22_jenkins-tools-sonar.png)
+
+**Step 9:** For **Maven Installations** select **Add Maven** and provide a name like maven and select the version from **Install from Apache** dropdown list.
+
+![Alt text](pics/23_jenkins-tools-maven.png)
+
+**Step 10:** Under **Dependency-Check Installations** select **Add Dependency-Check** provide a name like dependency-check. Select **Install Automatically** radio button and click on **Add Installer** dropdown list and select **Install from github.com** and select a version.
+
+![Alt text](pics/24_jenkins-tools-dp.png)
+
+**Step 11:** Same for the Docker Installations click on the Add Docker button to provide a name such as docker. Select **Install Automatically** radio button and click on **Add Installer** dropdown list and select **Download from docker.com**
+
+![Alt text](pics/25_jenkins-tools-docker.png)
+
+**Step 12:** Click on the Apply button and then on the Save button to save the configurations. 
+
+Now all the tools are configured with Jenkins but not yet connected the SonarQube and Nexus services with Jenkins.
