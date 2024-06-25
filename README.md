@@ -3,7 +3,7 @@
 ```shell
 docker network create jenkins
 ```
-![Alt text](images/01_create-docker-network.png)
+![Alt text](pics/01_create-docker-network.png)
 
 **Step 2:** We will run the React App using a Docker container in a Docker container (more precisely in a Blue Ocean container). This practice is called dind, aka `docker in docker`. So, please download and run `docker:dind` Docker image using the following command.
 ```shell
@@ -23,7 +23,7 @@ docker run \
   --storage-driver overlay2
 ```
 
-![Alt text](images/02_run-dind.png)
+![Alt text](pics/02_run-dind.png)
 
 The following is an explanation of the command above.
 
@@ -54,7 +54,7 @@ The following is an explanation of the command above.
 - **--storage-driver overlay2:** Storage driver for Docker volumes. See the [Docker Storage drivers](https://docs.docker.com/storage/storagedriver/select-storage-driver) page for supported options.
 
 It also mapping the Docker volume
-![Alt text](images/03_check-volume.png)
+![Alt text](pics/03_check-volume.png)
 
 **Step 3:** Create `Dockerfile` and copy the following contents to your Dockerfile.
 ```shell
@@ -77,7 +77,7 @@ RUN jenkins-plugin-cli --plugins "blueocean:1.27.9 docker-workflow:572.v950f5899
 docker build -t myjenkins-blueocean:2.426.2-1 .
 ```
 
-![Alt text](images/04_jenkins-blueocean-image.png)
+![Alt text](pics/04_jenkins-blueocean-image.png)
 
 **Step 5:** After that, run `myjenkins-blueocean:2.426.2-1` image as a container in Docker using the following command.
 ```shell
@@ -98,7 +98,7 @@ docker run \
   myjenkins-blueocean:2.426.2-1 
 ```
 
-![Alt text](images/05_run-jenkins.png)
+![Alt text](pics/05_run-jenkins.png)
 
 The following is an explanation of the command above.
 - **--name:** Specifies the name of the Docker container that will be used to run the image.
@@ -137,7 +137,7 @@ docker logs jenkins-blueocean
 ```
 
 **Step 4:** From the Terminal/CMD application, copy the password between the 2 series of asterisks.
-![Alt text](images/06_jenkins-initial-password.png)
+![Alt text](pics/06_jenkins-initial-password.png)
 
 **Step 5:** Return to the *Unlock Jenkins* page in the browser, paste the password into the **Administrator password** column and click **Continue**.
 
@@ -152,4 +152,4 @@ docker logs jenkins-blueocean
 Note: This page may indicate *Jenkins is almost ready!* If so, click **Restart**. If the page doesn't refresh automatically after a few minutes, manually click the *refresh* icon in your browser.
 
 **Step 10:** If necessary, you can log back into Jenkins using the credentials you created earlier.
-![Alt text](images/07_jenkins-home.png)
+![Alt text](pics/07_jenkins-home.png)
