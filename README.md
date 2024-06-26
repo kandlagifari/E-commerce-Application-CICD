@@ -255,3 +255,48 @@ This will help us install multiple versions of jdk whichever we want to use we c
 **Step 12:** Click on the Apply button and then on the Save button to save the configurations. 
 
 Now all the tools are configured with Jenkins but not yet connected the SonarQube and Nexus services with Jenkins.
+
+
+# Part 6: Set up SonarQube with Jenkins
+
+To connect SonarQube with Jenkins we need some authentication like username and password but when tools need to communicate with each other we will be using tokens.
+
+**Step 1:** Go to the SonarQube dashboard in the **Administration** section click on the **Security** dropdown list and select **Users** and an admin user will be present that is us we signed In using an admin username and password.
+
+**Step 2:** On admin user under **Tokens** click on the hamburger icon under **Tokens for AdministratorGenerate Tokens** 
+
+![Alt text](pics/26_sonarqube-token.png)
+
+**Step 3:** Give a name for that token like admin-token
+
+![Alt text](pics/27_sonarqube-token-2.png)
+
+**Step 4:** Click on the Generate button a random hash will be generated.
+
+![Alt text](pics/28_sonarqube-token-3.png)
+
+**Step 5:** Go to Jenkins dashboard and navigate to **Manage Jenkins** In the Security section select **Credentials**. Select the **global** and click on **Add Credentials**
+
+![Alt text](pics/29_jenkins-credentials.png)
+
+**Step 6:** In **New Credentials** under **Kind** select **Secret text** in **Scope** keep **Global** selected. In **Secret**, paste the SonarQube Admin user token and In **ID** provide a string like sonar-token same for description. Click on Create to create a credential.
+
+**Step 7:** On the Jenkins dashboard navigate to **Manage Jenkins** and select **System**. Scroll down to the **SonarQube servers**. Click on the **Add SonarQube** button. In the **Name** enter a string like sonar. In the **Server URL** enter the SonarQube Server IP with a port number like **http://{{SonarQube-Node-IP}}:{{Host-Port}}** in the **Server authentication token** dropdown select the token we created in Credentials. Click on apply and save button.
+
+![Alt text](pics/31_jenkins-sonar-server.png)
+
+> **Note:** Because we are deploying SonarQube on the same VM with Jenkins, we can use the IP from the default Docker Network Bridge from the **Gateway** section. You can run following command to get the IP
+```shell
+docker network inspect bridge
+```
+
+![Alt text](pics/32_docker-network-bridge.png)
+
+
+# Part 7: 
+
+
+
+
+
+
