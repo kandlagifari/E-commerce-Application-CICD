@@ -826,7 +826,7 @@ pipeline {
       steps{
         script{
           withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: '', contextName: '', credentialsId: 'k8s-service-account-token', namespace: 'ecommerce', serverUrl: 'https://kind-control-plane:6443']]) {
-            sh "kubectl apply -f deploymentservice.yml -n ecommerce --validate=false"
+            sh "kubectl apply -f deploymentservice.yaml -n ecommerce --validate=false"
             sh "kubectl get svc -n ecommerce"
           }
         } 
