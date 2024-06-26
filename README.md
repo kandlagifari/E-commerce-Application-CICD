@@ -335,4 +335,13 @@ What is the difference between releases and snapshots?
 
 - From the Nexus dashboard click on the copy button for maven-snapshots copy the URL and paste it into the `<snapshotRepository> </snapshotRepository>` block's `<url> </url>` block.
 
+> **Note:** Again, because we are deploying Nexus on the same VM with Jenkins, we can use the IP from the default Docker Network Bridge from the **Gateway** section. You can run following command to get the IP
+```shell
+docker network inspect bridge
+```
+
 ![Alt text](pics/40_pom-file.png)
+
+If your code is on the local environment make changes and push it on github later. If your code is on GitHub then make changes on GitHub directly.
+
+
