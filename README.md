@@ -5,8 +5,8 @@
 - [Part 3: Running SonarQube in Docker](#part-3-running-sonarqube-in-docker)
 - [Part 4: Running Nexus in Docker](#part-4-running-nexus-in-docker)
 - [Part 5: Setup Jenkins Plugins and Tools](#part-5-setup-jenkins-plugins-and-tools)
-- [Part 6: Set up SonarQube with Jenkins](#part-6-set-up-sonarqube-with-jenkins)
-- [Part 7: Set up Nexus with Jenkins](#part-7-set-up-nexus-with-jenkins)
+- [Part 6: Setup SonarQube with Jenkins](#part-6-setup-sonarqube-with-jenkins)
+- [Part 7: Setup Nexus with Jenkins](#part-7-setup-nexus-with-jenkins)
 - [Part 8: Add GitHub and DockerHub credentials in Jenkins](#part-8-add-github-and-dockerhub-credentials-in-jenkins)
 - [Part 9: Creation of Jenkins Pipeline](#part-9-creation-of-jenkins-pipeline)
 
@@ -269,7 +269,7 @@ This will help us install multiple versions of jdk whichever we want to use we c
 Now all the tools are configured with Jenkins but not yet connected the SonarQube and Nexus services with Jenkins.
 
 
-# Part 6: Set up SonarQube with Jenkins
+# Part 6: Setup SonarQube with Jenkins
 
 To connect SonarQube with Jenkins we need some authentication like username and password but when tools need to communicate with each other we will be using tokens.
 
@@ -305,7 +305,7 @@ docker network inspect bridge
 ![Alt text](pics/32_docker-network-bridge.png)
 
 
-# Part 7: Set up Nexus with Jenkins
+# Part 7: Setup Nexus with Jenkins
 
 Now let's configure and connect Nexus with Jenkins this configuration needs to be done inside the source configuration files. We need to install a plugin for Managed Files where we create configuration credentials for servers. 
 
