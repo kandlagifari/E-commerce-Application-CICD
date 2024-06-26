@@ -293,10 +293,46 @@ docker network inspect bridge
 ![Alt text](pics/32_docker-network-bridge.png)
 
 
-# Part 7: 
+# Part 7: Set up Nexus with Jenkins
 
+Now let's configure and connect Nexus with Jenkins this configuration needs to be done inside the source configuration files. We need to install a plugin for Managed Files where we create configuration credentials for servers. 
 
+**Step 1:** Go to Jenkins dashboard and select **Manage Jenkins** and select Plugins click on **Available Plugins**. Search for **Config File Provider** plugin. Select it and install it.
 
+![Alt text](pics/33_install-plugins-3.png)
 
+**Step 2:** Once the **Config File Provider** plugin installation is complete, navigate to the **Manage Jenkins** and now the **Managed files** tab will be visible click on that.
+
+![Alt text](pics/34_managed-files-plugins.png)
+
+**Step 3:** Click on **Add a new Config** button and select **Global Maven settings.xml** scroll down in ID enter a string like **global-maven** and click on the Next button. 
+
+![Alt text](pics/35_global-maven.png)
+
+**Step 4:** In the **Edit Configuration File** scroll down in the Content section copy line number 119 to 123 and paste it below line 124.
+
+![Alt text](pics/36_global-maven-2.png)
+
+**Step 5:** Go to the Nexus dashboard and click on the **Setting** icon that is beside the search tab and from the right-hand side select **Repository** and **Repositories**. Select **maven-releases** repository and copy the **Name** of the repository which is maven-releases.
+
+![Alt text](pics/37_maven-releases.png)
+
+**Step 6:** paste the **maven-releases** repository name inside the <id> </id> block of the <server> </server> block in Content of Jenkins dashboard. For username and password block provide the Nexus admin username and password. For password security, we can use the **Server Credentials** option above the content tab.
+
+![Alt text](pics/38_global-maven-3.png)
+
+**Step 7:** Repeat the same steps for **maven-snapshots** copy the above <server> </server> block and copy and paste the id from the Nexus dashboard which is **maven-snapshots** and provide the username and password of the Nexus admin user. Next click on Submit button.
+
+![Alt text](pics/39_global-maven-4.png)
+
+What is the difference between releases and snapshots?
+
+> Releases get deployed in the production environment and snapshots are deployed in non-production environments like development.
+
+**Step 8:** Now we need to edit the pom.xml file which is present on the GitHub repository. 
+
+- From the Nexus dashboard click on the copy button for maven-releases copy the URL and paste it into the <repository> </repository> block's <url> </url> block. repeat same steps for maven-snapshots.
+
+- From the Nexus dashboard click on the copy button for maven-snapshots copy the URL and paste it into the <snapshotRepository> </snapshotRepository> block's <url> </url> block.
 
 
