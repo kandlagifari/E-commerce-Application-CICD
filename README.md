@@ -17,6 +17,7 @@
     - [Sonatype Nexus Repository](#sonatype-nexus-repository)
 - [Part 11: Setup Kubernetes Cluster](#part-11-setup-kubernetes-cluster)
 - [Part 12: Install Trivy on the Jenkins Container](#part-12-install-trivy-on-the-jenkins-container)
+- [Part 13: Add Kubernetes Deployment Stages to Jenkins Pipeline Script](#part-13-add-kubernetes-deployment-stages-to-jenkins-pipeline-script)
 
 # Part 1: Running Jenkins in Docker
 **Step 1:** Create a network bridge in Docker using the following command.
@@ -90,6 +91,11 @@ RUN echo "deb [arch=$(dpkg --print-architecture) \
   https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 RUN apt-get update && apt-get install -y docker-ce-cli
+
+# Install Kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN mv kubectl /usr/local/bin
+RUN chmod +x /usr/local/bin/kubectl
 
 # Install Trivy
 RUN apt-get install wget apt-transport-https gnupg lsb-release -y
@@ -702,3 +708,24 @@ echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.
 sudo apt-get update
 sudo apt-get install trivy -y
 ```
+
+
+# Part 13: Add Kubernetes Deployment Stages to Jenkins Pipeline Script
+
+**Step 1:** Now let's install Kubernetes and Kubernetes CLI plugins from the Jenkins dashboard in the Plugins section under Available Plugins. Click on the Install button.
+
+![Alt text](pics/55_install-plugins-5.png)
+
+**Step 2:** Create a new credential in Jenkins so that Jenkins can access the Kubernetes cluster as a service account user.
+
+![Alt text](pics/56_jenkins-credentials-k8s.png)
+
+To view the secret service account token that we created earlier execute the following command and paste it into the Secret tab while creating a credential.
+```shell
+kubectl get secret jenkins-token -n ecommerce -o jsonpath="{.data.token}" | base64 --decode && echo
+```
+
+**Step 3:** For the Kubernetes API endpoint from the **.kube/config** file output copy the IP of the server and paste it on Jenkins' **Kubernetes API endpoint**.
+
+
+
