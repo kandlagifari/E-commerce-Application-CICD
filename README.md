@@ -16,6 +16,7 @@
     - [OWASP Dependency Checker](#owasp-dependency-checker)
     - [Sonatype Nexus Repository](#sonatype-nexus-repository)
 - [Part 11: Setup Kubernetes Cluster](#part-11-setup-kubernetes-cluster)
+- [Part 12: Install Trivy on the Jenkins Container](#part-12-install-trivy-on-the-jenkins-container)
 
 # Part 1: Running Jenkins in Docker
 **Step 1:** Create a network bridge in Docker using the following command.
@@ -77,8 +78,10 @@ It also mapping the Docker volume
 
 **Step 3:** Create `Dockerfile` and copy the following contents to your Dockerfile.
 ```shell
-FROM jenkins/jenkins:2.463-jdk17
+FROM jenkins/jenkins:2.464-jdk17
 USER root
+
+# Install Docker
 RUN apt-get update && apt-get install -y lsb-release
 RUN curl -fsSLo /usr/share/keyrings/docker-archive-keyring.asc \
   https://download.docker.com/linux/debian/gpg
@@ -87,18 +90,27 @@ RUN echo "deb [arch=$(dpkg --print-architecture) \
   https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 RUN apt-get update && apt-get install -y docker-ce-cli
+
+# Install Trivy
+RUN apt-get install wget apt-transport-https gnupg lsb-release -y
+RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null
+RUN echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/trivy.list
+RUN apt-get update
+RUN apt-get install trivy -y
+
+# Install Jenkins Plugins
 USER jenkins
-RUN jenkins-plugin-cli --plugins "blueocean:1.27.9 docker-workflow:572.v950f58993843" # New version blueocean:1.27.13 docker-workflow:580.vc0c340686b_54
+RUN jenkins-plugin-cli --plugins "blueocean:1.27.13 docker-workflow:580.vc0c340686b_54" # Initial version blueocean:1.27.9 docker-workflow:572.v950f58993843
 ```
 
-**Step 4:** Create a new Docker image from the previous Dockerfile and name it `myjenkins-blueocean:2.463.2-1`.
+**Step 4:** Create a new Docker image from the previous Dockerfile and name it `myjenkins-blueocean:2.464.2-1`.
 ```shell
-docker build -t myjenkins-blueocean:2.463.2-1 .
+docker build -t myjenkins-blueocean:2.464.2-1 .
 ```
 
 ![Alt text](pics/04_jenkins-blueocean-image.png)
 
-**Step 5:** After that, run `myjenkins-blueocean:2.463.2-1` image as a container in Docker using the following command.
+**Step 5:** After that, run `myjenkins-blueocean:2.464.2-1` image as a container in Docker using the following command.
 ```shell
 docker run \
   --name jenkins-blueocean \
@@ -114,7 +126,7 @@ docker run \
   --volume "$HOME":/home \
   --restart=on-failure \
   --env JAVA_OPTS="-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true" \
-  myjenkins-blueocean:2.463.2-1 
+  myjenkins-blueocean:2.464.2-1 
 ```
 
 ![Alt text](pics/05_run-jenkins.png)
@@ -142,7 +154,7 @@ The following is an explanation of the command above.
 
 - **--env JAVA_OPTS="-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true":** Allows checkout on local repositories.
 
-- **myjenkins-blueocean:2.463.2-1:** The name of the Docker image you created in the previous step.
+- **myjenkins-blueocean:2.464.2-1:** The name of the Docker image you created in the previous step.
 
 
 # Part 2: Setting up Jenkins Wizard
@@ -665,3 +677,28 @@ kubectl apply -f serviceaccounttoken.yaml
 ```
 
 **Step 14:** To view the token that is created inside the secret we need to run the following command. Remember that we need to get/retrieve the decoded token and not the base64 encoded token.
+```shell
+kubectl get secret jenkins-token -n ecommerce -o jsonpath="{.data.token}" | base64 --decode && echo
+```
+
+![Alt text](pics/54_jenkins-sa-token.png)
+
+Now we need to find the config file which is inside the .kube hidden folder that we created earlier. The config file contains complete information about the k8s cluster.
+
+
+# Part 12: Install Trivy on the Jenkins Container
+> This part is optional, because we already installed trivy along with the docker image build process on the earlier. If we build the docker images, the Jenkins setup such as Plugins, Tools, Credentials will be persistent because we are using Docker Volume
+
+**Step 1:** As there is no official trivy plugin available on Jenkins we manually have to install trivy on Jenkins container. 
+```shell
+docker exec -it jenkins-blueocean bash
+```
+
+**Step 2:** Run the below commands on Jenkins container to install trivy.
+```shell
+sudo apt-get install wget apt-transport-https gnupg lsb-release
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy -y
+```
