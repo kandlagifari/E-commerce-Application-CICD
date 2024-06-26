@@ -1,3 +1,15 @@
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+- [Part 1: Running Jenkins in Docker](#part-1-running-jenkins-in-docker)
+- [Part 2: Setting up Jenkins Wizard](#part-2-setting-up-jenkins-wizard)
+- [Part 3: Running SonarQube in Docker](#part-3-running-sonarqube-in-docker)
+- [Part 4: Running Nexus in Docker](#part-4-running-nexus-in-docker)
+- [Part 5: Setup Jenkins Plugins and Tools](#part-5-setup-jenkins-plugins-and-tools)
+- [Part 6: Set up SonarQube with Jenkins](#part-6-set-up-sonarqube-with-jenkins)
+- [Part 7: Set up Nexus with Jenkins](#part-7-set-up-nexus-with-jenkins)
+- [Part 8: Add GitHub and DockerHub credentials in Jenkins](#part-8-add-github-and-dockerhub-credentials-in-jenkins)
+- [Part 9: Creation of Jenkins Pipeline](#part-9-creation-of-jenkins-pipeline)
+
 # Part 1: Running Jenkins in Docker
 **Step 1:** Create a network bridge in Docker using the following command.
 ```shell
