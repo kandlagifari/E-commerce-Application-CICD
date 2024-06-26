@@ -452,3 +452,6 @@ pipeline {
 }
 ```
 
+**Step 6:** You can also refer to Jenkinsfile on the GitHub repository by specifying the **Repository URL** to GitHub HTTPS URL. If you are using private repository, you also will need to specify the **Credentials**, which we already setup on the previous section.
+
+![Alt text](pics/47_jenkins-pipeline-4.png)
