@@ -9,6 +9,12 @@
 - [Part 7: Setup Nexus with Jenkins](#part-7-setup-nexus-with-jenkins)
 - [Part 8: Add GitHub and DockerHub credentials in Jenkins](#part-8-add-github-and-dockerhub-credentials-in-jenkins)
 - [Part 9: Creation of Jenkins Pipeline](#part-9-creation-of-jenkins-pipeline)
+- [Part 10: First Phase Pipeline Checks and Feedback](#part-10-first-phase-pipeline-checks-and-feedback)
+    - [Jenkins Pipeline (Classic)](#jenkins-pipeline-classic)
+    - [Jenkins Pipeline (Blue Ocean)](#jenkins-pipeline-blue-ocean)
+    - [SonarQube Quality and Security](#sonarqube-quality-and-security)
+    - [OWASP Dependency Checker](#owasp-dependency-checker)
+    - [Sonatype Nexus Repository](#sonatype-nexus-repository)
 
 # Part 1: Running Jenkins in Docker
 **Step 1:** Create a network bridge in Docker using the following command.
@@ -455,3 +461,42 @@ pipeline {
 **Step 6:** You can also refer to Jenkinsfile on the GitHub repository by specifying the **Repository URL** to GitHub HTTPS URL. If you are using private repository, you also will need to specify the **Credentials**, which we already setup on the previous section.
 
 ![Alt text](pics/47_jenkins-pipeline-4.png)
+
+
+# Part 10: First Phase Pipeline Checks and Feedback
+
+Since this is a DevSecOps pipeline, security analysis results from SonarQube and OWASP Dependency Checker provide valuable insights for improving code quality and mitigating vulnerabilities. Let's review these results and provide actionable feedback to the developer.
+
+### Jenkins Pipeline (Classic)
+Access the results in Jenkins under Dashboard > E-commerce-Application-CICD
+
+![Alt text](pics/48_jenkins-classic-build.png)
+
+### Jenkins Pipeline (Blue Ocean)
+Access the results in Jenkins under Dashboard > E-commerce-Application-CICD > Open Blue Ocean > Choose the Build
+
+![Alt text](pics/49_jenkins-blueocean-build.png)
+
+### SonarQube Quality and Security
+Access the SonarQube dashboard at `<IP-address>:30002` (default port is 9000)
+
+![Alt text](pics/50_sonarqube-result.png)
+
+Findings:
+- 0 Vulnerabilities (positive)
+- 25 Bugs
+- 2 Security Hotspots
+
+### OWASP Dependency Checker
+Access the results in Jenkins under Dashboard > E-commerce-Application-CICD > #6 > Dependency-Check.
+
+![Alt text](pics/51_dependency-check.png)
+
+Identified vulnerabilities: 70 Critical, 141 High, 173 Medium, and 8 Low severity.
+
+**Action:** Collaborate with the developer to address these vulnerabilities as soon as possible.
+
+### Sonatype Nexus Repository
+Access the SonarQube dashboard at `<IP-address>:30003` (default port is 8081)
+
+![Alt text](pics/52_nexus-artifact.png)
