@@ -345,3 +345,17 @@ docker network inspect bridge
 If your code is on the local environment make changes and push it on github later. If your code is on GitHub then make changes on GitHub directly.
 
 
+# Part 8: Add GitHub and DockerHub credentials in Jenkins
+
+Because, Jenkins will be interact with the GitHub and DockerHub, so we need to add those credentials in Jenkins
+
+**Step 1:** Go to Jenkins dashboard and navigate to **Manage Jenkins** In the Security section select **Credentials**. Select the **global** and click on **Add Credentials**
+
+**Step 2:** For **Kind** keep the **Username with password** selected and keep **Scope** Global for the **Username** enter your dockerhub username and for **Password** enter your dockerhub password (you can also use personal access token) and enter a string for ID like dockerhub-credentials
+
+![Alt text](pics/41_jenkins-credentials-dockerhub.png)
+
+**Step 3:** Again click on Add Credentials, for **Kind** keep the **Username with password** selected and keep **Scope** Global for the **Username** enter your github username and for **Password** enter your github password (you can also use personal access token) and enter a string for ID like github-credentials
+
+![Alt text](pics/42_jenkins-credentials-github.png)
+
