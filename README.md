@@ -18,6 +18,12 @@
 - [Part 11: Setup Kubernetes Cluster](#part-11-setup-kubernetes-cluster)
 - [Part 12: Install Trivy on the Jenkins Container](#part-12-install-trivy-on-the-jenkins-container)
 - [Part 13: Add Kubernetes Deployment Stages to Jenkins Pipeline Script](#part-13-add-kubernetes-deployment-stages-to-jenkins-pipeline-script)
+- [Part 14: Second Phase Pipeline Checks and Feedback](#part-14-second-phase-pipeline-checks-and-feedback)
+    - [Docker Hub](#docker-hub)
+    - [Jenkins Pipeline (Classic)](#jenkins-pipeline-classic-1)
+    - [Jenkins Pipeline (Blue Ocean)](#jenkins-pipeline-blue-ocean-1)
+    - [Trivy Scan Results](#trivy-scan-results)
+    - [E-Commerce Application](#e-commerce-application)
 
 # Part 1: Running Jenkins in Docker
 **Step 1:** Create a network bridge in Docker using the following command.
@@ -835,3 +841,47 @@ pipeline {
   }
 }
 ```
+
+
+# Part 14: Second Phase Pipeline Checks and Feedback
+
+Since the security analysis results from SonarQube and OWASP Dependency Checker will be same as the first phase, we can skip that and review additional security stage with Trivy which also provide valuable insights for improving code quality and mitigating vulnerabilities. Let's review these results and provide actionable feedback to the developer.
+
+### Docker Hub
+Login to your Docker Hub and you will see the new image that pushed by Jenkins
+
+![Alt text](pics/59_docker-hub.png)
+
+### Jenkins Pipeline (Classic)
+Access the results in Jenkins under Dashboard > E-commerce-Application-CICD
+
+![Alt text](pics/60_jenkins-classic-build-2.png)
+
+### Jenkins Pipeline (Blue Ocean)
+Access the results in Jenkins under Dashboard > E-commerce-Application-CICD > Open Blue Ocean > Choose the Build
+
+![Alt text](pics/61_jenkins-blueocean-build-2.png)
+
+### Trivy Scan Results
+You can copy trivy scan result file to your local machine, and then review it
+```shell
+docker cp jenkins-blueocean:/var/jenkins_home/workspace/E-commerce-Application-CICD/trivy-report.txt ~/devops-project/E-commerce-Application-CICD/trivy/trivy-report.txt
+```
+
+![Alt text](pics/62_trivy-report.png)
+
+Identified vulnerabilities: 15 Critical, 43 High, 140 Medium, and 140 Low severity.
+
+**Action:** Report these vulnerabilities to the developer and work collaboratively to prioritize and fix them promptly.
+
+### E-Commerce Application
+To access our application using KinD, we can use port forward by running following command
+```shell
+kubectl port-forward --address 0.0.0.0 -n ecommerce svc/ecommerce-application-svc 8070:8070
+```
+
+And then open `<IP-address>:8070` on your browser
+
+![Alt text](pics/63_ecommerce-app.png)
+
+![Alt text](pics/64_ecommerce-app-2.png)
