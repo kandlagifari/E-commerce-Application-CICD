@@ -359,3 +359,84 @@ Because, Jenkins will be interact with the GitHub and DockerHub, so we need to a
 
 ![Alt text](pics/42_jenkins-credentials-github.png)
 
+
+# Part 9: Creation of Jenkins Pipeline
+**Step 1:** Click on the New Item button on the Jenkins dashboard enter a name for your pipeline select Pipeline and click on the OK button.
+
+![Alt text](pics/43_jenkins-pipeline.png)
+
+**Step 2:** Provide a short description of the pipeline. Select **Discard old builds** and inside **Days to keep builds** enter 10 **Max # of builds to keep** tab enter 2.
+
+![Alt text](pics/44_jenkins-pipeline-2.png)
+
+**Step 3:** Scroll down to the Pipeline section and select Hello World from the dropdown list to get a basic groovy syntax. Remember two different stages can't have the same name. Make use of Pipeline Syntax if you are not aware of any specific syntax of Groovy.
+
+![Alt text](pics/45_jenkins-pipeline-3.png)
+
+> **Note:** We have not defined Java or Maven so whatever is installed on the Jenkins server that it's going to use. To make use of specific versions of tools like Java and Maven we need to define the versions in the tools{} block of the pipeline script.
+
+**Step 4:** Install the **Pipeline Maven Integration** Plugin from the Plugins tab on the Jenkins dashboard.
+
+![Alt text](pics/46_install-plugins-4.png)
+
+**Step 5:** Pipeline script till Deploy Artifact to Nexus Stage.
+```groovy
+pipeline {
+  agent any
+  tools {
+    maven 'maven'
+    jdk 'jdk17'
+  }
+  environment {
+    SCANNER_HOME = tool 'sonar-scanner'
+  }
+  stages {
+    stage('Git Checkout') {
+      steps {
+        git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/kandlagifari/E-commerce-Application-CICD.git'
+      }
+    }
+    stage('Code Compilation') {
+      steps {
+        sh "mvn compile"
+      }
+    }
+    stage('Unit Tests') {
+      steps {
+        sh "mvn test -DskipTests=true"
+      }
+    }
+    stage('SonaeQube Analysis') {
+      steps {
+        withSonarQubeEnv('sonar') {
+          sh ''' 
+          $SCANNER_HOME/bin/sonar-scanner \
+          -Dsonar.projectKey=E-commerce-Application \
+          -Dsonar.projectName=E-commerce-Application \
+          -Dsonar.java.binaries=. 
+          '''
+        }
+      }
+    }
+    stage('OWASP Dependency-Check') {
+      steps {
+        dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dependency-check'
+        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+      }
+    }
+    stage('Maven Build') {
+      steps {
+        sh "mvn package -DskipTests=true"
+      }
+    }
+    stage('Deploy Artifact to Nexus') {
+      steps {
+        withMaven(globalMavenSettingsConfig: 'global-maven', jdk: 'jdk17', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
+          sh "mvn deploy -DskipTests=true"
+        }
+      }
+    }
+  }
+}
+```
+
