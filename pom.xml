@@ -148,16 +148,16 @@
         </plugins>
     </build>
 
-         <distributionManagement>
+<distributionManagement>
     <repository>
       <id>maven-releases</id>
       <name>maven-releases</name>
-      <url>http://13.201.70.158:8081/repository/maven-releases/</url>
+      <url>http://172.17.0.1:30003/repository/maven-releases/</url>
     </repository>
     <snapshotRepository>
       <id>maven-snapshots</id>
       <name>maven-snapshots</name>
-      <url>http://13.201.70.158:8081/repository/maven-snapshots/</url>
+      <url>http://172.17.0.1:30003/repository/maven-snapshots/</url>
     </snapshotRepository>
 </distributionManagement>
 
