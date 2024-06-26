@@ -15,6 +15,7 @@
     - [SonarQube Quality and Security](#sonarqube-quality-and-security)
     - [OWASP Dependency Checker](#owasp-dependency-checker)
     - [Sonatype Nexus Repository](#sonatype-nexus-repository)
+- [Part 11: Setup Kubernetes Cluster](#part-11-setup-kubernetes-cluster)
 
 # Part 1: Running Jenkins in Docker
 **Step 1:** Create a network bridge in Docker using the following command.
@@ -500,3 +501,167 @@ Identified vulnerabilities: 70 Critical, 141 High, 173 Medium, and 8 Low severit
 Access the SonarQube dashboard at `<IP-address>:30003` (default port is 8081)
 
 ![Alt text](pics/52_nexus-artifact.png)
+
+
+# Part 11: Setup Kubernetes Cluster
+
+Now we need to set up a Kubernetes cluster. In this demo, I will use KinD to create simple Kubernetes Cluster with only one Control Plane node
+
+**Step 1:** Install **KinD** from release binaries, you can always refer to the [official documentation](https://kind.sigs.k8s.io/docs/user/quick-start/)
+```shell
+# For AMD64 / x86_64
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
+# For ARM64
+[ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-arm64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+```
+
+**Step 2:** Install **kubectl** by running the following command
+```shell
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo mv kubectl /usr/local/bin
+sudo chmod +x /usr/local/bin/kubectl
+kubectl version --client
+```
+
+**Step 3:** Create a cluster configuration file called **cluster.yaml** as follows 
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+```
+
+**Step 4:** Create a cluster by running the following command
+```shell
+kind create cluster --config=cluster.yaml
+kubectl cluster-info --context kind-kind
+```
+
+You will have simple Kubernetes Cluster with one nodes
+
+![Alt text](pics/53_setup-k8s-cluster.png)
+
+Once the Kubernetes cluster is set we need to create a service account, and a role assign that role to the service account, create a secret for that service account, and create a token. We also need to create a namespace inside a Kubernetes cluster.
+
+**Step 5:** On the control plane or master node of the Kubernetes cluster run the below commands
+```shell
+kubectl create namespace ecommerce
+```
+
+**Step 6:** Create a service account with the name jenkins so that using this service account Jenkins can access the Kubernetes cluster. Create a Kubernetes manifest file named as **serviceaccount.yaml** using Vim editor (you can also create new directory and store YAML file on the repository) and copy the below content in that file
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: ecommerce
+```
+
+**Step 7:** Execute the below command to apply the changes
+```shell
+kubectl apply -f serviceaccount.yaml
+```
+
+**Step 8:** Now create a role to define what kind of access a service account will have that will be attached to this role. Create a k8s manifest file named **role.yaml**
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-role
+  namespace: ecommerce
+rules:
+- apiGroups:
+  - ""
+  - apps
+  - autoscaling
+  - batch
+  - extensions
+  - policy
+  - rbac.authorization.k8s.io
+  resources:
+  - pods
+  - componentstatuses
+  - configmaps
+  - daemonstes
+  - deployments
+  - events
+  - endpoints
+  - horizontalpodautoscalers
+  - ingress
+  - jobs
+  - limitranges
+  - namespaces
+  - nodes
+  - pods
+  - persistentvolumes
+  - persistentvolumeclaims
+  - resourcequotas
+  - replicasets
+  - replicationcontrollers
+  - serviceaccounts
+  - services
+  verbs: ["get", "list", "watch", "create", "updadte", "patch", "delete"]
+```
+
+**Step 9:** Run the below command to apply the changes
+```shell
+kubectl apply -f role.yaml
+```
+
+**Step 10:** Next, we need to assign this role to the service account that we created for that Create a k8s manifest file named **assign.yaml**
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: app-rolebinding
+  namespace: ecommerce
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: app-role
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: ecommerce
+```
+
+**Step 11:** Run the below command to apply the changes
+```shell
+kubectl apply -f assign.yaml
+```
+
+Generally, the root account is not used to perform deployments using CI/CD tools. Instead, service accounts are used.
+
+**Step 12:** Now we need to generate a token for the service account so that Jenkins can access the service account using the token. Create a k8s manifest file named **serviceaccounttoken.yaml**
+```yaml
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: jenkins-token
+  namespace: ecommerce
+  annotations:
+    kubernetes.io/service-account.name: jenkins
+```
+
+**Step 13:** Run the below command to apply the changes in webapps namespace
+```shell
+kubectl apply -f serviceaccounttoken.yaml
+```
+
+**Step 14:** To view the token that is created inside the secret we need to run the following command. Remember that we need to get/retrieve the decoded token and not the base64 encoded token.
