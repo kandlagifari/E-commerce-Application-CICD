@@ -388,7 +388,7 @@ pipeline {
     jdk 'jdk17'
   }
   environment {
-    SCANNER_HOME = tool 'sonar-scanner'
+    SCANNER_HOME = tool 'sonarqube-scanner'
   }
   stages {
     stage('Git Checkout') {
@@ -406,7 +406,7 @@ pipeline {
         sh "mvn test -DskipTests=true"
       }
     }
-    stage('SonaeQube Analysis') {
+    stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('sonar') {
           sh ''' 
