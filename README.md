@@ -317,11 +317,11 @@ Now let's configure and connect Nexus with Jenkins this configuration needs to b
 
 ![Alt text](pics/37_maven-releases.png)
 
-**Step 6:** paste the **maven-releases** repository name inside the <id> </id> block of the <server> </server> block in Content of Jenkins dashboard. For username and password block provide the Nexus admin username and password. For password security, we can use the **Server Credentials** option above the content tab.
+**Step 6:** paste the **maven-releases** repository name inside the `<id> </id>` block of the `<server> </server>` block in Content of Jenkins dashboard. For username and password block provide the Nexus admin username and password. For password security, we can use the **Server Credentials** option above the content tab.
 
 ![Alt text](pics/38_global-maven-3.png)
 
-**Step 7:** Repeat the same steps for **maven-snapshots** copy the above <server> </server> block and copy and paste the id from the Nexus dashboard which is **maven-snapshots** and provide the username and password of the Nexus admin user. Next click on Submit button.
+**Step 7:** Repeat the same steps for **maven-snapshots** copy the above `<server> </server>` block and copy and paste the id from the Nexus dashboard which is **maven-snapshots** and provide the username and password of the Nexus admin user. Next click on Submit button.
 
 ![Alt text](pics/39_global-maven-4.png)
 
@@ -331,8 +331,8 @@ What is the difference between releases and snapshots?
 
 **Step 8:** Now we need to edit the pom.xml file which is present on the GitHub repository. 
 
-- From the Nexus dashboard click on the copy button for maven-releases copy the URL and paste it into the <repository> </repository> block's <url> </url> block. repeat same steps for maven-snapshots.
+- From the Nexus dashboard click on the copy button for maven-releases copy the URL and paste it into the `<repository> </repository>` block's `<url> </url>` block. repeat same steps for maven-snapshots.
 
-- From the Nexus dashboard click on the copy button for maven-snapshots copy the URL and paste it into the <snapshotRepository> </snapshotRepository> block's <url> </url> block.
+- From the Nexus dashboard click on the copy button for maven-snapshots copy the URL and paste it into the `<snapshotRepository> </snapshotRepository>` block's `<url> </url>` block.
 
-
+![Alt text](pics/40_pom-file.png)
