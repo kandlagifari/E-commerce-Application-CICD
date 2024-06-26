@@ -729,6 +729,16 @@ kubectl get secret jenkins-token -n ecommerce -o jsonpath="{.data.token}" | base
 
 ![Alt text](pics/57_k8s-sample-pipeline.png)
 
+> `kind get kubeconfig --internal` will give you the contents of a KUBECONFIG you can use within the `kind` docker network instead of on the host. Because of how docker handles networking you'll still need your container to be on that network (e.g. with `docker network connect`).
+
+```shell
+# Get the API server endpoint
+kind get kubeconfig --internal
+
+# Connect Jenkins container into KinD network
+docker network connect kind jenkins-blueocean
+```
+
 **Step 4:** Now update the image name and container port number inside the kubernetes manifest file named **deploymentservice.yaml**
 
 **Step 5:** Complete Jenkins Pipeline script looks like this in which docker, trivy and kubernetes deployment stages are added and it's a final pipeline script (If you are using Jenkinsfile, you can adjust it and push to GitHub repository)
